@@ -3130,6 +3130,7 @@ static int do_init_module(struct module *mod)
 #endif
 	unset_module_init_ro_nx(mod);
 	module_arch_freeing_init(mod);
+	module_memfree(mod->module_init);
 	mod->module_init = NULL;
 	mod->init_size = 0;
 	mod->init_ro_size = 0;
