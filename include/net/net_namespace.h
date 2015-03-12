@@ -54,6 +54,8 @@ struct net {
 #endif
 	spinlock_t		rules_mod_lock;
 
+        atomic64_t              cookie_gen;
+
 	u32			hash_mix;
 
 	struct list_head	list;		/* list of network namespaces */
