@@ -1481,6 +1481,10 @@ tc_cls_act_func_proto(enum bpf_func_id func_id)
 		return &bpf_clone_redirect_proto;
 	case BPF_FUNC_get_cgroup_classid:
 		return &bpf_get_cgroup_classid_proto;
+	case BPF_FUNC_skb_vlan_push:
+		return &bpf_skb_vlan_push_proto;
+	case BPF_FUNC_skb_vlan_pop:
+		return &bpf_skb_vlan_pop_proto;
 	default:
 		return sk_filter_func_proto(func_id);
 	}
