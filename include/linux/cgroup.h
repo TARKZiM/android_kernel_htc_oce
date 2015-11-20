@@ -691,6 +691,11 @@ struct cgroup_subsys {
 #include <linux/cgroup_subsys.h>
 #undef SUBSYS
 
+static inline void cgroup_put(struct cgroup *cgrp)
+{
+	css_put(&cgrp->self);
+}
+
 /**
  * task_css_set_check - obtain a task's css_set with extra access conditions
  * @task: the task to obtain css_set for
@@ -912,6 +917,8 @@ void css_task_iter_start(struct cgroup_subsys_state *css,
 			 struct css_task_iter *it);
 struct task_struct *css_task_iter_next(struct css_task_iter *it);
 void css_task_iter_end(struct css_task_iter *it);
+
+struct cgroup *cgroup_get_from_path(const char *path);
 
 int cgroup_attach_task_all(struct task_struct *from, struct task_struct *);
 int cgroup_transfer_tasks(struct cgroup *to, struct cgroup *from);
