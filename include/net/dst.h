@@ -401,6 +401,19 @@ static inline struct dst_entry *skb_dst_pop(struct sk_buff *skb)
 }
 
 int dst_discard_sk(struct sock *sk, struct sk_buff *skb);
+
+static inline u32 dst_tclassid(const struct sk_buff *skb)
+{
+#ifdef CONFIG_IP_ROUTE_CLASSID
+	const struct dst_entry *dst;
+
+	dst = skb_dst(skb);
+	if (dst)
+		return dst->tclassid;
+#endif
+	return 0;
+}
+
 static inline int dst_discard(struct sk_buff *skb)
 {
 	return dst_discard_sk(skb->sk, skb);
