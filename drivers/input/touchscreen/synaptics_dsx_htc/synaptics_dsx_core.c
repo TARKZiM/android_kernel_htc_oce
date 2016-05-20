@@ -5223,19 +5223,12 @@ static int synaptics_rmi4_probe(struct platform_device *pdev)
 	}
 
 #ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_DSX_SUPPORT_INCELL
-	if (strcmp(htc_get_bootmode(), "recovery") == 0) {
-		pr_info("Recovery mode. Disable touch\n");
-		retval = -ENODEV;
-		goto err_off_mode;
-	}
-
 	if (strcmp(htc_get_bootmode(), "offmode_charging") == 0) {
 		pr_info("Offmode charging. Disable touch interrupts\n");
 		offmode_charging_flag = 1;
 	}
 #else
-	if ((strcmp(htc_get_bootmode(), "offmode_charging") == 0)
-		|| (strcmp(htc_get_bootmode(), "recovery") == 0)) {
+	if (strcmp(htc_get_bootmode(), "offmode_charging") == 0) {
 		pr_info("%s mode. Set touch chip to sleep mode and skip touch driver probe\n", htc_get_bootmode());
 		synaptics_rmi4_sensor_sleep(rmi4_data);
 		retval = -ENODEV;
