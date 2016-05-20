@@ -2110,8 +2110,7 @@ static int cypress_cap_probe(struct i2c_client *client,
 		goto err_init_sensor_failed;
 	}
 
-	if ((strcmp(htc_get_bootmode(), "offmode_charging") == 0)
-		|| (strcmp(htc_get_bootmode(), "recovery") == 0)) {
+	if (strcmp(htc_get_bootmode(), "offmode_charging") == 0) {
 		pr_info("%s mode. Set touch chip to sleep mode and skip touch driver probe\n", htc_get_bootmode());
 		if (cs->cs_bootloader_mode == 0)
 			cypress_set_sleep_mode(cs, 1);
