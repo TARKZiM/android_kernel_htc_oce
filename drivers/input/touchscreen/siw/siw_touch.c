@@ -1623,8 +1623,7 @@ static int siw_touch_do_probe_normal(void *data)
 #if defined(__SIW_TEST_IRQ_OFF)
 	ts->irq = 0;
 #else	/* __SIW_TEST_IRQ_OFF */
-	if ((strcmp(htc_get_bootmode(), "offmode_charging") == 0)
-		|| (strcmp(htc_get_bootmode(), "recovery") == 0)) {
+	if ((strcmp(htc_get_bootmode(), "offmode_charging") == 0)) {
 		t_dev_info(dev, "%s mode. normal probe w/o irq.\n", htc_get_bootmode());
 		ts->irq = 0;
 	} else {
@@ -1900,8 +1899,7 @@ int siw_touch_probe(struct siw_ts *ts)
 
 	if ((strcmp(htc_get_bootmode(), "download") == 0)
 			|| (strcmp(htc_get_bootmode(), "RUU") == 0)
-			|| (strcmp(htc_get_bootmode(), "offmode_charging") == 0)
-			|| (strcmp(htc_get_bootmode(), "recovery") == 0)) {
+			|| (strcmp(htc_get_bootmode(), "offmode_charging") == 0)) {
 		t_dev_info(dev, "%s mode. Skip touch F/W upgrade & font data download.\n",
 				htc_get_bootmode());
 		ts->skip_upgrade = 1;
