@@ -8681,11 +8681,9 @@ static int himax852xes_probe(struct i2c_client *client, const struct i2c_device_
 
 	mfg_mode = htc_get_bootmode();
 	if((strcmp(mfg_mode, "offmode_charging") == 0) ||
-		(strcmp(mfg_mode, "recovery") == 0) ||
 		(strcmp(mfg_mode, "charger") == 0) ||
 		(strcmp(mfg_mode, "MFG_MODE_OFFMODE_CHARGING") == 0) ||
-		(strcmp(mfg_mode, "MFG_MODE_POWER_TEST") == 0) ||
-		(strcmp(mfg_mode, "MFG_MODE_RECOVERY") == 0))
+		(strcmp(mfg_mode, "MFG_MODE_POWER_TEST") == 0))
 	{
 		I(" %s: %s mode. Set touch chip to sleep mode and skip touch driver probe\n",
 		__func__, mfg_mode);
