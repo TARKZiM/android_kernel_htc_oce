@@ -194,6 +194,11 @@ config DEV_COREDUMP
 	default y if WANT_DEV_COREDUMP
 	depends on ALLOW_DEV_COREDUMP
 
+config FW_CACHE
+       bool "Enable firmware caching during suspend"
+       depends on PM_SLEEP
+       default n
+
 config DEBUG_DRIVER
 	bool "Driver Core verbose debug messages"
 	depends on DEBUG_KERNEL
