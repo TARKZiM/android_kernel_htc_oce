@@ -22,6 +22,7 @@
 #include <linux/seq_file.h>
 #include <linux/kernfs.h>
 #include <linux/wait.h>
+#include <linux/bpf-cgroup.h>
 
 #ifdef CONFIG_CGROUPS
 
@@ -241,6 +242,9 @@ struct cgroup {
 
 	/* used to schedule release agent */
 	struct work_struct release_agent_work;
+
+	/* used to store eBPF programs */
+	struct cgroup_bpf bpf;
 };
 
 #define MAX_CGROUP_ROOT_NAMELEN 64
