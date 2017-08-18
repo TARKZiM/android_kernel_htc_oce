@@ -3169,9 +3169,9 @@ update_cfs_rq_load_avg(u64 now, struct cfs_rq *cfs_rq, bool update_freq)
     return 0;
 }
 
-#define UPDATE_TG    0x0
-#define SKIP_AGE_LOAD    0x0
-#define SKIP_CPUFREQ    0x3
+#define UPDATE_TG	0x0
+#define SKIP_AGE_LOAD	0x0
+#define SKIP_CPUFREQ	0x0
 
 static inline void update_load_avg(struct sched_entity *se, int not_used1){}
 static inline void
