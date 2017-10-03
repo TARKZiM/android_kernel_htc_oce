@@ -1697,6 +1697,9 @@ static int cgroup_setup_root(struct cgroup_root *root, unsigned int ss_mask)
 	if (ret)
 		goto destroy_root;
 
+	ret = cgroup_bpf_inherit(root_cgrp);
+	WARN_ON_ONCE(ret);
+
 	/*
 	 * There must be no failure case after here, since rebinding takes
 	 * care of subsystems' refcounts, which are explicitly dropped in
@@ -4740,6 +4743,9 @@ static int cgroup_mkdir(struct kernfs_node *parent_kn, const char *name,
 
 	cgrp->self.parent = &parent->self;
 	cgrp->root = root;
+	ret = cgroup_bpf_inherit(cgrp);
+	if (ret)
+		goto out_idr_free;
 
 	if (notify_on_release(parent))
 		set_bit(CGRP_NOTIFY_ON_RELEASE, &cgrp->flags);
@@ -4773,9 +4779,6 @@ static int cgroup_mkdir(struct kernfs_node *parent_kn, const char *name,
 	 * point, it'll be released via the normal destruction path.
 	 */
 	cgroup_idr_replace(&root->cgroup_idr, cgrp, cgrp->id);
-
-	if (parent)
-		cgroup_bpf_inherit(cgrp, parent);
 
 	ret = cgroup_kn_set_ugid(kn);
 	if (ret)
@@ -5553,14 +5556,23 @@ struct cgroup_subsys_state *css_from_id(int id, struct cgroup_subsys *ss)
 }
 
 #ifdef CONFIG_CGROUP_BPF
-int cgroup_bpf_update(struct cgroup *cgrp, struct bpf_prog *prog,
-		      enum bpf_attach_type type, bool overridable)
+int cgroup_bpf_attach(struct cgroup *cgrp, struct bpf_prog *prog,
+		      enum bpf_attach_type type, u32 flags)
 {
-	struct cgroup *parent = cgroup_parent(cgrp);
 	int ret;
 
 	mutex_lock(&cgroup_mutex);
-	ret = __cgroup_bpf_update(cgrp, parent, prog, type, overridable);
+	ret = __cgroup_bpf_attach(cgrp, prog, type, flags);
+	mutex_unlock(&cgroup_mutex);
+	return ret;
+}
+int cgroup_bpf_detach(struct cgroup *cgrp, struct bpf_prog *prog,
+		      enum bpf_attach_type type, u32 flags)
+{
+	int ret;
+
+	mutex_lock(&cgroup_mutex);
+	ret = __cgroup_bpf_detach(cgrp, prog, type, flags);
 	mutex_unlock(&cgroup_mutex);
 	return ret;
 }
