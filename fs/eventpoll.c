@@ -1245,7 +1245,6 @@ static int ep_create_wakeup_source(struct epitem *epi)
 	get_task_comm(task_comm_buf, current);
 
 	if (!epi->ep->ws) {
-		epi->ep->ws = wakeup_source_register("eventpoll");
 		snprintf(buf, sizeof(buf), "epoll_%.*s_epollfd",
 			 (int)sizeof(task_comm_buf), task_comm_buf);
 		epi->ep->ws = wakeup_source_register(buf);
