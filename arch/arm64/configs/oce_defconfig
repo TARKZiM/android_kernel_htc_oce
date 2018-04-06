@@ -933,7 +933,7 @@ CONFIG_EXFAT_PATH="texfat_msm8996"
 CONFIG_EXFAT_VERSION="target/htc.d/htc-3015.8.4-msm8996-l-3.18"
 
 CONFIG_NR_CPUS=4
-CONFIG_HTC_PNPMGR=y
+# CONFIG_HTC_PNPMGR is not set
 
 #
 # Systrace
