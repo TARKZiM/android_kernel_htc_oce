@@ -1356,6 +1356,10 @@ static int __write_node_page(struct page *page, bool atomic, bool *submitted,
 	if (unlikely(f2fs_cp_error(sbi)))
 		goto redirty_out;
 
+	if (wbc->sync_mode == WB_SYNC_NONE &&
+			IS_DNODE(page) && is_cold_node(page))
+		goto redirty_out;
+
 	/* get old block addr of this node page */
 	nid = nid_of_node(page);
 	f2fs_bug_on(sbi, page->index != nid);
@@ -1637,6 +1641,8 @@ continue_unlock:
 	}
 
 	if (step < 2) {
+		if (wbc->sync_mode == WB_SYNC_NONE && step == 1)
+			goto out;
 		step++;
 		goto next_step;
 	}
