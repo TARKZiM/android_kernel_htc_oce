@@ -2769,7 +2769,6 @@ static int __init msm_performance_init(void)
 
 	init_events_group();
 #endif // CONFIG_MSM_PERFORMANCE_CPUFREQ_LIMITS_VOTING_ONLY
-
 	return 0;
 }
 late_initcall(msm_performance_init);
