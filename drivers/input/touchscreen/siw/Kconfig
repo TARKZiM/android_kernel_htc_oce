@@ -64,6 +64,16 @@ config TOUCHSCREEN_HTC_DEBUG_SPI
 	help
 	  If HTC SPI debug & misc function are not used, say N
 
+
+config OCE_DISABLE_SECOND_SCREEN
+	bool "Disable the secondary screen on oce devices"
+	depends on TOUCHSCREEN_SIW
+	help
+	  Disables the second screen for devices with userspace which lacks
+	  support.  Notably this includes all non-stock versions of Android
+	  for LGE devices at the time of this writing (progress is being
+	  made for other Android versions though).
+
 source "drivers/input/touchscreen/siw/mon/Kconfig"
 
 endmenu

@@ -8,7 +8,11 @@
 		qcom,mdss-dsi-virtual-channel-id = <0>;
 		qcom,mdss-dsi-stream = <0>;
 		qcom,mdss-dsi-panel-width = <1440>;
-		qcom,mdss-dsi-panel-height = <2720>;
+//#ifdef CONFIG_OCE_DISABLE_SECOND_SCREEN
+		qcom,mdss-dsi-panel-height = <2560>;
+//#else
+//		qcom,mdss-dsi-panel-height = <2720>;
+//#endif
 		qcom,mdss-dsi-h-front-porch = <100>;
 		qcom,mdss-dsi-h-back-porch = <32>;
 		qcom,mdss-dsi-h-pulse-width = <16>;
@@ -18,7 +22,11 @@
 		qcom,mdss-dsi-v-pulse-width = <1>;
 		qcom,mdss-dsi-h-left-border = <0>;
 		qcom,mdss-dsi-h-right-border = <0>;
-		qcom,mdss-dsi-v-top-border = <0>;
+//#ifdef CONFIG_OCE_DISABLE_SECOND_SCREEN
+		qcom,mdss-dsi-v-top-border = <160>;
+//#else
+//		qcom,mdss-dsi-v-top-border = <0>;
+//#endif
 		qcom,mdss-dsi-v-bottom-border = <0>;
 		qcom,mdss-pan-physical-width-dimension  = <71>;
 		qcom,mdss-pan-physical-height-dimension = <135>;
@@ -136,8 +144,8 @@
 		qcom,cont-splash-enabled;
 
 		/* Partial update */
-		qcom,partial-update-enabled;
-		qcom,panel-roi-alignment = <1440 16 1440 16 1440 16>;
+//		qcom,partial-update-enabled;
+//		qcom,panel-roi-alignment = <1440 16 1440 16 1440 16>;
 
 		qcom,panel-supply-entries = <&dsi_panel_pwr_supply_sw49407>;
 		qcom,mdss-dsi-lp11-init;
@@ -303,8 +311,8 @@
 		qcom,cont-splash-enabled;
 
 		/* Partial update */
-		qcom,partial-update-enabled;
-		qcom,panel-roi-alignment = <1440 16 1440 16 1440 16>;
+//		qcom,partial-update-enabled;
+//		qcom,panel-roi-alignment = <1440 16 1440 16 1440 16>;
 
 		qcom,panel-supply-entries = <&dsi_panel_pwr_supply_sw49407>;
 		qcom,mdss-dsi-lp11-init;

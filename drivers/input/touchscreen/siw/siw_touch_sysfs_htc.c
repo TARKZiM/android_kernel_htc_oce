@@ -119,8 +119,13 @@ static int register_sr_touch_device(void)
 
 	input_set_abs_params(ts->sr_input_dev, ABS_MT_POSITION_X,
 			0, caps->max_x, 0, 0);
+//#ifdef CONFIG_OCE_DISABLE_SECOND_SCREEN
 	input_set_abs_params(ts->sr_input_dev, ABS_MT_POSITION_Y,
-			0, caps->max_y, 0, 0);
+			160, caps->max_y, 0, 0);
+//#else
+//	input_set_abs_params(ts->sr_input_dev, ABS_MT_POSITION_Y,
+//			0, caps->max_y, 0, 0);
+//#endif
 	input_set_abs_params(ts->sr_input_dev, ABS_MT_TOUCH_MAJOR,
 			0, 255, 0, 0);
 	input_set_abs_params(ts->sr_input_dev, ABS_MT_PRESSURE,
