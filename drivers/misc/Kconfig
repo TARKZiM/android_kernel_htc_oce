@@ -641,6 +641,17 @@ config HTC_MCUROUTE
     help
       This option enables support for the htc_mcuroute function.
 
+config OCEAN_NOTE
+    boolean "HTC Ocean Note"
+    default n
+    help
+      U Ultra.
+ config OCEAN_PME
+    boolean "HTC 10"
+    default n
+    help
+      HTC 10.
+
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"
