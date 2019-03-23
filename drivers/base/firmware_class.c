@@ -1719,9 +1719,6 @@ static int uncache_firmware(const char *fw_name)
 	return -EINVAL;
 }
 
-#ifdef CONFIG_FW_CACHE
-static ASYNC_DOMAIN_EXCLUSIVE(fw_cache_domain);
-
 static struct fw_cache_entry *alloc_fw_cache_entry(const char *name)
 {
 	struct fw_cache_entry *fce;
