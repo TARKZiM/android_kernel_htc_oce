@@ -113,8 +113,7 @@ int wifi_platform_bus_enumerate(wifi_adapter_info_t *adapter, bool device_presen
 int wifi_platform_get_irq_number(wifi_adapter_info_t *adapter, unsigned long *irq_flags_ptr);
 int wifi_platform_get_mac_addr(wifi_adapter_info_t *adapter, unsigned char *buf);
 #ifdef CUSTOM_COUNTRY_CODE
-void *wifi_platform_get_country_code(wifi_adapter_info_t *adapter, char *ccode,
-   u32 flags);
+void *wifi_platform_get_country_code(wifi_adapter_info_t *adapter, char *ccode, u32 flags);
 #else
 void *wifi_platform_get_country_code(wifi_adapter_info_t *adapter, char *ccode);
 #endif /* CUSTOM_COUNTRY_CODE */
