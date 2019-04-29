@@ -4276,8 +4276,6 @@ static enum hrtimer_restart sched_cfs_slack_timer(struct hrtimer *timer)
     return HRTIMER_NORESTART;
 }
 
-extern const u64 max_cfs_quota_period;
-
 static enum hrtimer_restart sched_cfs_period_timer(struct hrtimer *timer)
 {
     struct cfs_bandwidth *cfs_b =
@@ -4285,7 +4283,6 @@ static enum hrtimer_restart sched_cfs_period_timer(struct hrtimer *timer)
     ktime_t now;
     int overrun;
     int idle = 0;
-    int count = 0;
     
     raw_spin_lock(&cfs_b->lock);
     for (;;) {
@@ -4294,28 +4291,6 @@ static enum hrtimer_restart sched_cfs_period_timer(struct hrtimer *timer)
         
         if (!overrun)
             break;
-        
-        if (++count > 3) {
-            u64 new, old = ktime_to_ns(cfs_b->period);
-            
-            new = (old * 147) / 128; /* ~115% */
-            new = min(new, max_cfs_quota_period);
-            
-            cfs_b->period = ns_to_ktime(new);
-            
-            /* since max is 1s, this is limited to 1e9^2, which fits in u64 */
-            cfs_b->quota *= new;
-            cfs_b->quota = div64_u64(cfs_b->quota, old);
-            
-            pr_warn_ratelimited(
-                                "cfs_period_timer[cpu%d]: period too short, scaling up (new cfs_period_us %lld, cfs_quota_us = %lld)\n",
-                                smp_processor_id(),
-                                div_u64(new, NSEC_PER_USEC),
-                                div_u64(cfs_b->quota, NSEC_PER_USEC));
-            
-            /* reset count so we don't come right back in here */
-            count = 0;
-        }
         
         idle = do_sched_cfs_period_timer(cfs_b, overrun);
     }
@@ -7661,35 +7636,35 @@ static void update_blocked_averages(int cpu)
  */
 static void update_cfs_rq_h_load(struct cfs_rq *cfs_rq)
 {
-	struct rq *rq = rq_of(cfs_rq);
-	struct sched_entity *se = cfs_rq->tg->se[cpu_of(rq)];
-	unsigned long now = jiffies;
-	unsigned long load;
-
-	if (cfs_rq->last_h_load_update == now)
-		return;
-
-	WRITE_ONCE(cfs_rq->h_load_next, NULL);
-	for_each_sched_entity(se) {
-		cfs_rq = cfs_rq_of(se);
-		WRITE_ONCE(cfs_rq->h_load_next, se);
-		if (cfs_rq->last_h_load_update == now)
-			break;
-	}
-
-	if (!se) {
-		cfs_rq->h_load = cfs_rq->runnable_load_avg;
-		cfs_rq->last_h_load_update = now;
-	}
-
-	while ((se = READ_ONCE(cfs_rq->h_load_next)) != NULL) {
-		load = cfs_rq->h_load;
-		load = div64_ul(load * se->avg.load_avg_contrib,
-				cfs_rq->runnable_load_avg + 1);
-		cfs_rq = group_cfs_rq(se);
-		cfs_rq->h_load = load;
-		cfs_rq->last_h_load_update = now;
-	}
+    struct rq *rq = rq_of(cfs_rq);
+    struct sched_entity *se = cfs_rq->tg->se[cpu_of(rq)];
+    unsigned long now = jiffies;
+    unsigned long load;
+    
+    if (cfs_rq->last_h_load_update == now)
+        return;
+    
+    cfs_rq->h_load_next = NULL;
+    for_each_sched_entity(se) {
+        cfs_rq = cfs_rq_of(se);
+        cfs_rq->h_load_next = se;
+        if (cfs_rq->last_h_load_update == now)
+            break;
+    }
+    
+    if (!se) {
+        cfs_rq->h_load = cfs_rq_load_avg(cfs_rq);
+        cfs_rq->last_h_load_update = now;
+    }
+    
+    while ((se = cfs_rq->h_load_next) != NULL) {
+        load = cfs_rq->h_load;
+        load = div64_ul(load * se->avg.load_avg,
+                        cfs_rq_load_avg(cfs_rq) + 1);
+        cfs_rq = group_cfs_rq(se);
+        cfs_rq->h_load = load;
+        cfs_rq->last_h_load_update = now;
+    }
 }
 
 static unsigned long task_h_load(struct task_struct *p)
