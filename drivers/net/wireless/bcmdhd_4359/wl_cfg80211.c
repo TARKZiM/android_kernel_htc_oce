@@ -7020,12 +7020,6 @@ wl_cfg80211_mgmt_tx(struct wiphy *wiphy, bcm_struct_cfgdev *cfgdev,
 			* tx is still in progress (including the dwell time),
 			* then this new action frame will not be sent out.
 			*/
-			if (len > (ACTION_FRAME_SIZE + DOT11_MGMT_HDR_LEN)) {
-				WL_ERR(("invalid action frame length\n"));
-				err = -EINVAL;
-				goto exit;
-			}
-			
 /* Do not abort scan for VSDB. Scan will be aborted in firmware if necessary.
  * And previous off-channel action frame must be ended before new af tx.
  */
