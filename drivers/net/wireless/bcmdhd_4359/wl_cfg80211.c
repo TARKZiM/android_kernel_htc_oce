@@ -12415,13 +12415,13 @@ wl_cfg80211_netdev_notifier_call(struct notifier_block * nb,
 	struct net_device *dev = netdev_notifier_info_to_dev(ptr);
 #endif /* LINUX_VERSION < VERSION(3, 11, 0) */
 	struct wireless_dev *wdev;
-	struct bcm_cfg80211 *cfg;
+	struct bcm_cfg80211 *cfg = g_bcm_cfg;
 
 	WL_DBG(("Enter \n"));
 	if (!dev || !ndev_to_wdev(dev))
 		return NOTIFY_DONE;
 
-	cfg = wl_get_cfg(dev);
+	//cfg = wl_get_cfg(dev);
 	if ((!cfg || ndev_to_wdev(dev) != cfg->wdev)) {
 		return NOTIFY_DONE;
 	}
