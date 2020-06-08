@@ -1936,9 +1936,9 @@
 			htc,mem-dump-table-phys = <0x836f0000>; /* at the end 0x10000 of Last LK RAM log */
 		};
 
-		dload_type@18 {
+		dload_type@1c {
 			compatible = "qcom,msm-imem-dload-type";
-			reg = <0x18 4>;
+			reg = <0x1c 4>;
 		};
 
 		restart_reason@65c {
