@@ -88,7 +88,6 @@
 #define MS_TO_PERIOD (1000 * 99 / 100)
 
 /* ========================================================================= */
-#define rel_significant_motion REL_WHEEL
 
 #define ACC_CALIBRATOR_LEN 3
 #define ACC_CALIBRATOR_RL_LEN 12
@@ -362,7 +361,6 @@ struct cwmcu_data {
 
 	struct workqueue_struct *mcu_wq;
 	struct wake_lock gesture_motion_wake_lock;
-	struct wake_lock significant_wake_lock;
 	struct wake_lock any_motion_wake_lock;
 	struct wake_lock ps_read_wake_lock;
 #ifdef SHUB_DLOAD_SUPPORT
@@ -3208,9 +3206,6 @@ static int firmware_odr(struct cwmcu_data *mcu_data, int sensors_id,
 	case CW_GEOMAGNETIC_ROTATION_VECTOR:
 		reg_addr = GEOM_ROTA_UPDATE_RATE;
 		break;
-	case CW_SIGNIFICANT_MOTION:
-		reg_addr = SIGN_UPDATE_RATE;
-		break;
 	case CW_PRESSURE:
 		reg_addr = PRESSURE_UPDATE_RATE;
 		break;
@@ -3402,7 +3397,7 @@ static int handle_batch_list(struct cwmcu_data *mcu_data, int sensors_id,
 	u64 sensors_bit;
 	u8 write_addr;
 
-	if ((sensors_id == CW_LIGHT) || (sensors_id == CW_PROXIMITY) || (sensors_id == CW_SIGNIFICANT_MOTION))
+	if ((sensors_id == CW_LIGHT) || (sensors_id == CW_PROXIMITY))
 		return 0;
 
 	sensors_bit = (1LL << sensors_id);
@@ -4017,7 +4012,6 @@ static ssize_t batch_set(struct device *dev,
 	case CW_STEP_COUNTER_W:
 		break;
 	case CW_LIGHT:
-	case CW_SIGNIFICANT_MOTION:
 	default:
 		atomic_set(&mcu_data->critical_sect, 0);
 		D("%s: Batch not supported for this sensor_id = 0x%x\n",
@@ -4140,7 +4134,7 @@ static ssize_t flush_set(struct device *dev, struct device_attribute *attr,
 
 	data = handle;
 
-	if ((handle == CW_SIGNIFICANT_MOTION) ||(handle == CW_PROXIMITY)) {
+	if ((handle == CW_PROXIMITY)) {
 		mutex_lock(&mcu_data->lock);
 		cwmcu_send_flush(mcu_data, handle);
 		mutex_unlock(&mcu_data->lock);
@@ -5012,48 +5006,6 @@ static irqreturn_t cwmcu_irq_handler(int irq, void *handle)
 
 		clear_intr = CW_MCU_INT_BIT_LOG_AVAILABLE;
 		ret = CWMCU_i2c_write(mcu_data, CWSTM32_INT_ST2, &clear_intr, 1, 1);
-	}
-
-	/* INT_st3: bit 4 */
-	if (INT_st3 & CW_MCU_INT_BIT_SIGNIFICANT_MOTION) {
-		if (mcu_data->enabled_list & (1LL << CW_SIGNIFICANT_MOTION)) {
-			u16 data_buff[REPORT_EVENT_COMMON_LEN] = {0};
-			__le64 data64[2];
-			u8 *data = (u8 *)data64;
-
-			data = data + sizeof(__le64) - sizeof(u8);
-
-			ret = CWMCU_i2c_read(mcu_data,
-					     CWSTM32_READ_SIGNIFICANT_MOTION,
-					     data, sizeof(u8) + sizeof(__le64));
-			if (ret >= 0) {
-				u64 timestamp_event;
-				__le64 *le64_timestamp = data64 + 1;
-
-				timestamp_event = le64_to_cpu(*le64_timestamp);
-
-				mcu_data->sensors_time[CW_SIGNIFICANT_MOTION]
-						= 0;
-
-				wake_lock_timeout(
-					&mcu_data->significant_wake_lock, HZ);
-
-				data_buff[0] = 1;
-				cw_send_event(mcu_data, CW_SIGNIFICANT_MOTION,
-					      data_buff, timestamp_event);
-
-				if (DEBUG_FLAG_GSENSOR == 1) {
-					I("irq_hndl: Significant timestamp = %llu\n"
-					  , timestamp_event);
-				}
-			} else {
-				E(
-				  "Read CWSTM32_READ_SIGNIFICANT_MOTION fails,"
-				  " ret = %d\n", ret);
-			}
-		}
-		clear_intr = CW_MCU_INT_BIT_SIGNIFICANT_MOTION;
-		CWMCU_i2c_write(mcu_data, CWSTM32_INT_ST3, &clear_intr, 1, 1);
 	}
 
 	/* INT_st3: bit 5 */
@@ -8927,8 +8879,6 @@ static int CWMCU_probe_init(struct cwmcu_data *mcu_data,
 
 	wake_lock_init(&mcu_data->gesture_motion_wake_lock, WAKE_LOCK_SUSPEND,
 		       "gesture_motion_wake_lock");
-	wake_lock_init(&mcu_data->significant_wake_lock, WAKE_LOCK_SUSPEND,
-		       "significant_wake_lock");
 	wake_lock_init(&mcu_data->any_motion_wake_lock, WAKE_LOCK_SUSPEND,
 		       "any_motion_wake_lock");
 	wake_lock_init(&mcu_data->ps_read_wake_lock, WAKE_LOCK_SUSPEND,
@@ -9113,7 +9063,6 @@ static int CWMCU_spi_remove(struct spi_device *spi)
 #endif //CONFIG_FB
 
 	wake_lock_destroy(&mcu_data->gesture_motion_wake_lock);
-	wake_lock_destroy(&mcu_data->significant_wake_lock);
 	wake_lock_destroy(&mcu_data->any_motion_wake_lock);
 	wake_lock_destroy(&mcu_data->ps_read_wake_lock);
 #ifdef SHUB_DLOAD_SUPPORT
@@ -9275,7 +9224,6 @@ static int CWMCU_i2c_remove(struct i2c_client *client)
 #endif //CONFIG_FB
 
 	wake_lock_destroy(&mcu_data->gesture_motion_wake_lock);
-	wake_lock_destroy(&mcu_data->significant_wake_lock);
 	wake_lock_destroy(&mcu_data->any_motion_wake_lock);
 	wake_lock_destroy(&mcu_data->ps_read_wake_lock);
 #ifdef SHUB_DLOAD_SUPPORT
