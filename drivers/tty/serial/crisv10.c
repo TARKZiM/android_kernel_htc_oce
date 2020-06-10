@@ -3216,7 +3216,9 @@ rs_throttle(struct tty_struct * tty)
 {
 	struct e100_serial *info = (struct e100_serial *)tty->driver_data;
 #ifdef SERIAL_DEBUG_THROTTLE
-	printk("throttle %s: %lu....\n", tty_name(tty),
+	char	buf[64];
+
+	printk("throttle %s: %lu....\n", tty_name(tty, buf),
 	       (unsigned long)tty->ldisc.chars_in_buffer(tty));
 #endif
 	DFLOW(DEBUG_LOG(info->line,"rs_throttle %lu\n", tty->ldisc.chars_in_buffer(tty)));
@@ -3236,7 +3238,9 @@ rs_unthrottle(struct tty_struct * tty)
 {
 	struct e100_serial *info = (struct e100_serial *)tty->driver_data;
 #ifdef SERIAL_DEBUG_THROTTLE
-	printk("unthrottle %s: %lu....\n", tty_name(tty),
+	char	buf[64];
+
+	printk("unthrottle %s: %lu....\n", tty_name(tty, buf),
 	       (unsigned long)tty->ldisc.chars_in_buffer(tty));
 #endif
 	DFLOW(DEBUG_LOG(info->line,"rs_unthrottle ldisc %d\n", tty->ldisc.chars_in_buffer(tty)));

@@ -908,10 +908,12 @@ retry:
 		filemap_fdatawrite(inode->i_mapping);
 		iput(inode);
 		/* We need to give cpu to another writers. */
-		if (ino == cur_ino)
+		if (ino == cur_ino) {
+			congestion_wait(BLK_RW_ASYNC, HZ/50);
 			cond_resched();
-		else
+		} else {
 			ino = cur_ino;
+		}
 	} else {
 		/*
 		 * We should submit bio, since it exists several

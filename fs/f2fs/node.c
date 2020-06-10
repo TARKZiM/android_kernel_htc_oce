@@ -1008,10 +1008,6 @@ int remove_inode_page(struct inode *inode)
 		truncate_data_blocks_range(&dn, 1);
 
 	/* 0 is possible, after f2fs_new_inode() has failed */
-	if (unlikely(f2fs_cp_error(F2FS_I_SB(inode)))) {
-		f2fs_put_dnode(&dn);
-		return -EIO;
-	}
 	f2fs_bug_on(F2FS_I_SB(inode),
 			inode->i_blocks != 0 && inode->i_blocks != 8);
 
@@ -1360,10 +1356,6 @@ static int __write_node_page(struct page *page, bool atomic, bool *submitted,
 	if (unlikely(f2fs_cp_error(sbi)))
 		goto redirty_out;
 
-	if (wbc->sync_mode == WB_SYNC_NONE &&
-			IS_DNODE(page) && is_cold_node(page))
-		goto redirty_out;
-
 	/* get old block addr of this node page */
 	nid = nid_of_node(page);
 	f2fs_bug_on(sbi, page->index != nid);
@@ -1593,9 +1585,7 @@ next_step:
 						!is_cold_node(page)))
 				continue;
 lock_node:
-			if (wbc->sync_mode == WB_SYNC_ALL)
-				lock_page(page);
-			else if (!trylock_page(page))
+			if (!trylock_page(page))
 				continue;
 
 			if (unlikely(page->mapping != NODE_MAPPING(sbi))) {
@@ -1645,8 +1635,6 @@ continue_unlock:
 	}
 
 	if (step < 2) {
-		if (wbc->sync_mode == WB_SYNC_NONE && step == 1)
-			goto out;
 		step++;
 		goto next_step;
 	}
@@ -2511,13 +2499,6 @@ void flush_nat_entries(struct f2fs_sb_info *sbi, struct cp_control *cpc)
 	unsigned int found;
 	nid_t set_idx = 0;
 	LIST_HEAD(sets);
-
-	/* during unmount, let's flush nat_bits before checking dirty_nat_cnt */
-	if (enabled_nat_bits(sbi, cpc)) {
-		down_write(&nm_i->nat_tree_lock);
-		remove_nats_in_journal(sbi);
-		up_write(&nm_i->nat_tree_lock);
-	}
 
 	if (!nm_i->dirty_nat_cnt)
 		return;

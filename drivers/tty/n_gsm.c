@@ -2297,6 +2297,7 @@ static void gsmld_receive_buf(struct tty_struct *tty, const unsigned char *cp,
 	const unsigned char *dp;
 	char *f;
 	int i;
+	char buf[64];
 	char flags = TTY_NORMAL;
 
 	if (debug & 4)
@@ -2318,7 +2319,7 @@ static void gsmld_receive_buf(struct tty_struct *tty, const unsigned char *cp,
 			break;
 		default:
 			WARN_ONCE(1, "%s: unknown flag %d\n",
-			       tty_name(tty), flags);
+			       tty_name(tty, buf), flags);
 			break;
 		}
 	}

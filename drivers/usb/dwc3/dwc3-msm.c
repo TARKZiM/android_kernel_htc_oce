@@ -68,11 +68,6 @@
 /* AHB2PHY read/write waite value */
 #define ONE_READ_WRITE_WAIT 0x11
 
-/* hack: define OP3 device */
-#ifndef CONFIG_MACH_MSM8996_15801
-#define CONFIG_MACH_MSM8996_15801
-#endif
-
 /* cpu to fix usb interrupt */
 static int cpu_to_affin;
 module_param(cpu_to_affin, int, S_IRUGO|S_IWUSR);
@@ -2229,6 +2224,10 @@ static int dwc3_msm_suspend(struct dwc3_msm *mdwc)
 		dev_dbg(mdwc->dev, "defer suspend with %d(msecs)\n",
 					mdwc->lpm_to_suspend_delay);
 		pm_wakeup_event(mdwc->dev, mdwc->lpm_to_suspend_delay);
+#ifndef CONFIG_MACH_MSM8996_15801
+	} else {
+		pm_relax(mdwc->dev);
+#endif
 	}
 
 	atomic_set(&dwc->in_lpm, 1);
@@ -2268,6 +2267,9 @@ static int dwc3_msm_resume(struct dwc3_msm *mdwc)
 		return 0;
 	}
 
+#ifndef CONFIG_MACH_MSM8996_15801
+	pm_stay_awake(mdwc->dev);
+#endif
 
 	/* Vote for TCXO while waking up USB HSPHY */
 	if (!mdwc->xo_vote_for_charger) {

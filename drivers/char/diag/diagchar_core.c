@@ -1315,19 +1315,15 @@ static int diag_process_userspace_remote(int proc, void *buf, int len)
 }
 #endif
 
-static int mask_request_validate(unsigned char mask_buf[], int len)
+static int mask_request_validate(unsigned char mask_buf[])
 {
 	uint8_t packet_id;
 	uint8_t subsys_id;
 	uint16_t ss_cmd;
 
-	if (len <= 0)
-		return 0;
 	packet_id = mask_buf[0];
 
 	if (packet_id == DIAG_CMD_DIAG_SUBSYS_DELAY) {
-		if (len < 2*sizeof(uint8_t) + sizeof(uint16_t))
-			return 0;
 		subsys_id = mask_buf[1];
 		ss_cmd = *(uint16_t *)(mask_buf + 2);
 		switch (subsys_id) {
@@ -1343,8 +1339,6 @@ static int mask_request_validate(unsigned char mask_buf[], int len)
 			return 0;
 		}
 	} else if (packet_id == 0x4B) {
-		if (len < 2*sizeof(uint8_t) + sizeof(uint16_t))
-			return 0;
 		subsys_id = mask_buf[1];
 		ss_cmd = *(uint16_t *)(mask_buf + 2);
 		/* Packets with SSID which are allowed */
@@ -2861,8 +2855,7 @@ static int diag_user_process_raw_data(const char __user *buf, int len)
 	}
 
 	/* Check for proc_type */
-	if (len >= sizeof(int))
-		remote_proc = diag_get_remote(*(int *)user_space_data);
+	remote_proc = diag_get_remote(*(int *)user_space_data);
 	if (remote_proc) {
 		token_offset = sizeof(int);
 		if (len <= MIN_SIZ_ALLOW) {
@@ -2876,7 +2869,7 @@ static int diag_user_process_raw_data(const char __user *buf, int len)
 	}
 	if (driver->mask_check) {
 		if (!mask_request_validate(user_space_data +
-						token_offset, len)) {
+						token_offset)) {
 			pr_alert("diag: mask request Invalid\n");
 			diagmem_free(driver, user_space_data, mempool);
 			user_space_data = NULL;
@@ -2960,7 +2953,7 @@ static int diag_user_process_userspace_data(const char __user *buf, int len)
 	/* Check masks for On-Device logging */
 	if (driver->mask_check) {
 		if (!mask_request_validate(driver->user_space_data_buf +
-					   token_offset, len)) {
+					   token_offset)) {
 			pr_alert("diag: mask request Invalid\n");
 			return -EFAULT;
 		}

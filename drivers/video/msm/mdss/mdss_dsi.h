@@ -594,7 +594,6 @@ struct dsi_status_data {
 	struct delayed_work check_status;
 	struct msm_fb_data_type *mfd;
 	struct notifier_block vendor_notifier;
-	struct work_struct irq_done;
 	bool   vendor_esd_error;
 };
 
