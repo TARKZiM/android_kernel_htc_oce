@@ -46,6 +46,10 @@
 #include "siw_touch_irq.h"
 #include "siw_touch_sys.h"
 
+#ifdef CONFIG_WAKE_GESTURES
+#include <linux/wake_gestures.h>
+#endif
+
 #if !defined(__SIW_CONFIG_OF)
 #pragma message("[SiW - Warning] No COFIG_OF")
 #endif
@@ -139,6 +143,15 @@ module_param_named(lpwg_sensor, t_lpwg_sensor, uint, S_IRUGO|S_IWUSR|S_IWGRP);
 module_param_named(lpwg_qcover, t_lpwg_qcover, uint, S_IRUGO|S_IWUSR|S_IWGRP);
 #endif
 
+#ifdef CONFIG_WAKE_GESTURES
+struct siw_ts *gl_ts_data;
+
+bool scr_suspended(void)
+{
+	struct siw_ts *ts = gl_ts_data;
+	return ts->suspend;
+}
+#endif
 
 static int siw_setup_names(struct siw_ts *ts, struct siw_touch_pdata *pdata)
 {
@@ -455,11 +468,22 @@ void siw_touch_suspend(struct device *dev)
 
 	t_dev_info(dev, "touch core pm suspend end(%d)\n", ret);
 
+#ifdef CONFIG_WAKE_GESTURES
+	if (device_may_wakeup(dev) && (s2w_switch || dt2w_switch)) {
+        siw_touch_irq_control(dev, INTERRUPT_ENABLE);
+        siw_ops_suspend(ts);
+        ts->suspend = true;
+
+	return;
+	}
+#endif
+
 #if !defined(CONFIG_TOUCHSCREEN_HTC_DEBUG)
 	if (ret == 1) {
 		mod_delayed_work(ts->wq, &ts->init_work, 0);
 	}
 #else
+
 	if (ret != 1)
 		ret = 0;
 	siw_touch_post_pm(dev, ret);
@@ -478,6 +502,25 @@ void siw_touch_resume(struct device *dev)
 
 	t_dev_info(dev, "touch core pm resume start\n");
 
+#ifdef CONFIG_WAKE_GESTURES
+	if (device_may_wakeup(dev) && (s2w_switch || dt2w_switch)) {
+
+		siw_touch_irq_control(dev, INTERRUPT_DISABLE);
+		ts->suspend = false;
+
+		if (dt2w_switch_changed) {
+			dt2w_switch = dt2w_switch_temp;
+			dt2w_switch_changed = false;
+		}
+		if (s2w_switch_changed) {
+			s2w_switch = s2w_switch_temp;
+			s2w_switch_changed = false;
+		}
+
+		return;
+	}
+#endif
+
 	mutex_lock(&ts->lock);
 	atomic_set(&ts->state.fb, FB_RESUME);
 	atomic_set(&ts->state.pm, DEV_PM_AWAKE);
@@ -487,6 +530,12 @@ void siw_touch_resume(struct device *dev)
 
 	t_dev_info(dev, "touch core pm resume end(%d)\n", ret);
 
+#ifdef CONFIG_WAKE_GESTURES
+	if (dt2w_switch) {
+                siw_touch_irq_control(dev, INTERRUPT_DISABLE);
+	}
+#endif
+
 #if !defined(CONFIG_TOUCHSCREEN_HTC_DEBUG)
 	if (ret == 0) {
 		mod_delayed_work(ts->wq, &ts->init_work, 0);
@@ -494,6 +543,18 @@ void siw_touch_resume(struct device *dev)
 #else
 	siw_touch_post_pm(dev, !ret);
 #endif
+
+#ifdef CONFIG_WAKE_GESTURES
+		if (dt2w_switch_changed) {
+			dt2w_switch = dt2w_switch_temp;
+			dt2w_switch_changed = false;
+		}
+		if (s2w_switch_changed) {
+			s2w_switch = s2w_switch_temp;
+			s2w_switch_changed = false;
+		}
+#endif
+
 }
 
 /**
@@ -506,7 +567,8 @@ void siw_touch_suspend_call(struct device *dev)
 #if !defined(__SIW_CONFIG_EARLYSUSPEND) && !defined(__SIW_CONFIG_FB)
 	siw_touch_suspend(dev);
 #endif
-}
+}
+
 
 /**
  * siw_touch_resume_call() - Helper function for touch resume
@@ -1449,6 +1511,10 @@ static struct siw_touch_pdata *_siw_touch_do_probe_common(struct siw_ts *ts)
 			touch_chip_name(ts), (u32)touch_get_quirks(ts));
 
 	atomic_set(&ts->state.core, CORE_EARLY_PROBE);
+
+#ifdef CONFIG_WAKE_GESTURES
+	gl_ts_data = ts;
+#endif
 
 	if (!ts->ops) {
 		t_dev_warn(dev, "%s ops is NULL : default ops selected\n",

@@ -997,6 +997,10 @@ struct siw_ts {
 	irq_handler_t thread_fn;
 	struct delayed_work work_irq;
 
+#ifdef CONFIG_WAKE_GESTURES
+	bool suspend;
+#endif
+
 	void *bus_dev;				/* i2c or spi */
 	struct device *dev;			/* client device : i2c->dev or spi->dev */
 	void *dev_data;				/* chip */
