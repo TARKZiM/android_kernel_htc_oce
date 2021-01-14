@@ -956,25 +956,6 @@ CONFIG_TASK_DELAY_ACCT=y
 CONFIG_TASK_XACCT=y
 CONFIG_TASK_IO_ACCOUNTING=y
 
-# Tuxera exFAT need enable this configuration
-# CONFIG_NLS_UTF8 is not set
-
-# exFAT Filesystem
-#   If you want enable,
-#       CONFIG_EXFAT_FS should be set to 'm' (don't set to 'y')
-#       CONFIG_EXFAT_FS should be modified with project code name to prevent conflict with other projects
-CONFIG_EXFAT_FS=y
-#CONFIG_EXFAT_PATH="texfat_msm8996"
-#CONFIG_EXFAT_VERSION="target/htc.d/htc-3015.8.4-msm8996-l-3.18"
-
-# exfat-nofuse from dorimanx source
-CONFIG_EXFAT_DISCARD=y
-CONFIG_EXFAT_DELAYED_SYNC=y
-# CONFIG_EXFAT_KERNEL_DEBUG is not set
-# CONFIG_EXFAT_DEBUG_MSG is not set
-CONFIG_EXFAT_DEFAULT_CODEPAGE=437
-CONFIG_EXFAT_DEFAULT_IOCHARSET="utf8"
-
 CONFIG_NR_CPUS=4
 # CONFIG_HTC_PNPMGR is not set
 
