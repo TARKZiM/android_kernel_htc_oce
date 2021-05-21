@@ -4744,8 +4744,10 @@ static int cgroup_mkdir(struct kernfs_node *parent_kn, const char *name,
 	cgrp->self.parent = &parent->self;
 	cgrp->root = root;
 	ret = cgroup_bpf_inherit(cgrp);
-	if (ret)
-		goto out_idr_free;
+	if (ret) {
+		cgroup_idr_remove(&root->cgroup_idr, cgrp->id);
+		goto out_cancel_ref;
+	}
 
 	if (notify_on_release(parent))
 		set_bit(CGRP_NOTIFY_ON_RELEASE, &cgrp->flags);
