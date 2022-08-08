@@ -3,7 +3,7 @@
 		compatible = "htc,oce_lgd_sw49407_dsc_cmd";
 		qcom,mdss-dsi-panel-name = "OceanNote WQHD SW49407 DSC cmd mode dsi panel";
 		qcom,mdss-dsi-panel-type = "dsi_cmd_mode";
-		qcom,mdss-dsi-panel-framerate = <57>;
+		qcom,mdss-dsi-panel-framerate = <60>;
 		qcom,mdss-dsi-panel-clockrate = <672000000>;
 		qcom,mdss-dsi-virtual-channel-id = <0>;
 		qcom,mdss-dsi-stream = <0>;
