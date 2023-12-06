@@ -123,11 +123,11 @@ static int ip6_finish_output2(struct sk_buff *skb)
 	return -EINVAL;
 }
 
-static int ip6_finish_output(struct sk_buff *skb)
+static int ip6_finish_output(struct sock *sk, struct sk_buff *skb)
 {
 	int ret;
 
-	ret = BPF_CGROUP_RUN_PROG_INET_EGRESS(skb->sk, skb);
+	ret = BPF_CGROUP_RUN_PROG_INET_EGRESS(sk, skb);
 	if (ret) {
 		kfree_skb(skb);
 		return ret;
